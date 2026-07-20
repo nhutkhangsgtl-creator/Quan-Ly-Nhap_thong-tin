@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quét CCCD Sinh Viên GDQP</title>
+  <!-- Thư viện giao diện Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Thư viện Quét QR Code -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body class="bg-slate-100 min-h-screen py-8 px-4 font-sans">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+    
+    <!-- Tiêu đề trang web -->
+    <div class="bg-indigo-600 p-6 text-white text-center">
+      <h1 class="text-2xl font-bold uppercase tracking-wide">THÔNG TIN SV GDQP (LỚP 5 - LỚP 15)</h1>
+      <p class="text-indigo-200 text-sm mt-1">Quét mã QR bằng Camera hoặc Tải ảnh từ Thư viện</p>
+    </div>
+
+    <div class="p-6 space-y-6">
+      
+      <!-- KHU VỰC CÔNG CỤ QUÉT QR CODE -->
+      <div class="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-xl p-4 bg-slate-50 space-y-3">
+        <div id="reader" class="w-full max-w-sm rounded-lg overflow-hidden"></div>
+        
+        <div class="flex flex-wrap justify-center gap-3 w-full">
+          <!-- 1. Nút mở Camera quét trực tiếp -->
+          <button id="btn-toggle-scan" onclick="toggleScanner()" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-5 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm">
+            📷 Mở Camera Quét QR
+          </button>
+
+          <!-- 2. Nút tải ảnh QR có sẵn trong máy/thư viện -->
+          <label class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-5 rounded-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer text-sm">
+            🖼️ Tải ảnh QR từ Thư viện
+            <input type="file" id="qr-input-file" accept="image/*" class="hidden" onchange="scanQRFromFile(event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- FORM NHẬP DỮ LIỆU SINH VIÊN -->
+      <form id="studentForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- ĐIỀU KIỆN 2: CHỌN TRANG TÍNH/LỚP HỌC ĐỂ LƯU DỮ LIỆU -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-bold text-indigo-700 mb-1">Chọn Lớp Học (Lưu vào đúng Sheet) <span class="text-red-500">*</span></label>
+          <select id="lop_hoc" required class="w-full border-2 border-indigo-300 rounded-lg p-2.5 text-sm font-semibold bg-indigo-50 text-indigo-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="DATA_LOP5">LỚP 5 (DATA_LOP5)</option>
+            <option value="DATA_LOP6">LỚP 6 (DATA_LOP6)</option>
+            <option value="DATA_LOP7">LỚP 7 (DATA_LOP7)</option>
+            <option value="DATA_LOP8">LỚP 8 (DATA_LOP8)</option>
+            <option value="DATA_LOP9">LỚP 9 (DATA_LOP9)</option>
+            <option value="DATA_LOP10">LỚP 10 (DATA_LOP10)</option>
+            <option value="DATA_LOP11">LỚP 11 (DATA_LOP11)</option>
+            <option value="DATA_LOP12">LỚP 12 (DATA_LOP12)</option>
+            <option value="DATA_LOP13">LỚP 13 (DATA_LOP13)</option>
+            <option value="DATA_LOP14">LỚP 14 (DATA_LOP14)</option>
+            <option value="DATA_LOP15">LỚP 15 (DATA_LOP15)</option>
+            <option value="DATA_LOPHOCSAU">ĐĂNG KÝ HỌC SAU (DATA_LOPHOCSAU)</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Mã QR Gốc (qr_code)</label>
+          <input type="text" id="qr_code" readonly class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm text-gray-600 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Số CCCD <span class="text-red-500">*</span></label>
+          <input type="text" id="cccd" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Số CMND cũ</label>
+          <input type="text" id="cmnd" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+          <input type="text" id="ho_va_ten" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh (DD/MM/YYYY)</label>
+          <input type="text" id="ngay_sinh" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
+          <input type="text" id="gioi_tinh" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ thường trú</label>
+          <input type="text" id="dia_chi" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ngày cấp (DD/MM/YYYY)</label>
+          <input type="text" id="ngay_cap" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <!-- ĐIỀU KIỆN 1: BẮT BUỘC NHẬP SỐ ĐIỆN THOẠI -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+          <input type="tel" id="SDT" placeholder="Nhập SĐT sinh viên..." required pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ (10-11 số)" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <!-- Nút Submit Form -->
+        <div class="md:col-span-2 pt-4">
+          <button type="submit" id="btn-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
+            LƯU THÔNG TIN SINH VIÊN
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ LƯU Ý: THAY ĐƯỜNG LINK WEB APP GOOGLE SCRIPT CỦA BẠN VÀO DÒNG DƯỚI ĐÂY
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzT60h7yVWHZXPWbqBPDky_LWPeovM9TtuNr8UW43nuGqryPEa3uZCUx5ehNNsqgrmr/exec";
+
+    let html5QrcodeScanner = null;
+    let isScanning = false;
+
+    // Định dạng lại chuỗi ngày từ 25102002 -> 25/10/2002
+    function formatDate(rawDate) {
+      if (!rawDate || rawDate.length !== 8) return rawDate;
+      return `${rawDate.substring(0, 2)}/${rawDate.substring(2, 4)}/${rawDate.substring(4, 8)}`;
+    }
+
+    // 1. Quét mã QR trực tiếp qua Camera
+    function toggleScanner() {
+      const btn = document.getElementById('btn-toggle-scan');
+      if (isScanning) {
+        html5QrcodeScanner.stop().then(() => {
+          isScanning = false;
+          btn.innerHTML = '📷 Mở Camera Quét QR';
+          btn.classList.replace('bg-red-600', 'bg-indigo-600');
+        });
+      } else {
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        html5QrcodeScanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onScanSuccess
+        ).then(() => {
+          isScanning = true;
+          btn.innerHTML = '🛑 Tắt Camera';
+          btn.classList.replace('bg-indigo-600', 'bg-red-600');
+        }).catch(err => {
+          alert('Không thể mở Camera. Hãy thử dùng nút "Tải ảnh QR từ Thư viện"!');
+        });
+      }
+    }
+
+    // 2. Tải ảnh QR có sẵn trong thư viện ảnh điện thoại
+    function scanQRFromFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.scanFile(file, true)
+        .then(decodedText => {
+          onScanSuccess(decodedText);
+        })
+        .catch(err => {
+          alert('Không tìm thấy hoặc không đọc được mã QR trong ảnh này. Vui lòng chụp lại rõ nét hơn!');
+        });
+    }
+
+    // 3. Giải mã chuỗi QR CCCD và điền tự động vào ô input
+    function onScanSuccess(decodedText) {
+      document.getElementById('qr_code').value = decodedText;
+      const parts = decodedText.split('|');
+
+      if (parts.length >= 6) {
+        document.getElementById('cccd').value = parts[0] || '';
+        document.getElementById('cmnd').value = parts[1] || '';
+        document.getElementById('ho_va_ten').value = parts[2] || '';
+        document.getElementById('ngay_sinh').value = formatDate(parts[3] || '');
+        document.getElementById('gioi_tinh').value = parts[4] || '';
+        document.getElementById('dia_chi').value = parts[5] || '';
+        document.getElementById('ngay_cap').value = formatDate(parts[6] || '');
+        
+        if (isScanning) toggleScanner();
+        alert('✅ Giải mã CCCD thành công!');
+      } else {
+        alert('⚠️ Mã QR không đúng định dạng CCCD!');
+      }
+    }
+
+    // 4. Gửi dữ liệu lưu vào đúng Sheet Lớp trên Google Sheets
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+
+      const btnSubmit = document.getElementById('btn-submit');
+      btnSubmit.disabled = true;
+      btnSubmit.innerText = 'Đang kiểm tra và lưu...';
+
+      const formData = {
+        lop_hoc: document.getElementById('lop_hoc').value,
+        qr_code: document.getElementById('qr_code').value,
+        cccd: document.getElementById('cccd').value,
+        cmnd: document.getElementById('cmnd').value,
+        ho_va_ten: document.getElementById('ho_va_ten').value,
+        ngay_sinh: document.getElementById('ngay_sinh').value,
+        gioi_tinh: document.getElementById('gioi_tinh').value,
+        dia_chi: document.getElementById('dia_chi').value,
+        ngay_cap: document.getElementById('ngay_cap').value,
+        SDT: document.getElementById('SDT').value
+      };
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.result === 'success') {
+          alert('✅ ' + result.message);
+          const selectedClass = document.getElementById('lop_hoc').value;
+          document.getElementById('studentForm').reset();
+          document.getElementById('lop_hoc').value = selectedClass; // Giữ nguyên lớp vừa chọn
+        } else {
+          // Báo lỗi trùng CCCD chi tiết (ở Lớp nào, STT/ID bao nhiêu)
+          alert('⚠️ CẢNH BÁO: ' + result.message);
+        }
+      } catch (err) {
+        alert('❌ Có lỗi kết nối đến Google Sheets!');
+        console.error(err);
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = 'LƯU THÔNG TIN SINH VIÊN';
+      }
+    }
+  </script>
+</body>
+</html>
